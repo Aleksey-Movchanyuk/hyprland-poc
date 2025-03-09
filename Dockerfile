@@ -55,7 +55,10 @@ RUN mkdir -p /run/user/1000 && \
     chown -R $USER:$USER /run/user/1000 && \
     # Setup crash report directory
     mkdir -p /var/crash && \
-    chmod 777 /var/crash
+    chmod 777 /var/crash && \
+    # Setup seatd socket directory
+    mkdir -p /run/seatd && \
+    chmod 777 /run/seatd
 
 # Hyprland configuration with debug logging enabled
 RUN echo "debug {" > /home/$USER/.config/hypr/hyprland.conf && \
@@ -70,7 +73,7 @@ RUN echo "[server]" > /home/$USER/.config/wayvnc/config.ini && \
     echo "port = 5900" >> /home/$USER/.config/wayvnc/config.ini && \
     echo "enable_auth = false" >> /home/$USER/.config/wayvnc/config.ini
 
-# Startup script (start seatd before hyprland)
+# Startup script (start seatd with sudo)
 RUN echo '#!/bin/bash' > /start.sh && \
     echo 'set -e' >> /start.sh && \
     echo 'export XDG_RUNTIME_DIR=/run/user/1000' >> /start.sh && \
@@ -82,7 +85,7 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo 'chmod 700 /run/user/1000' >> /start.sh && \
     echo 'chown -R user:user /run/user/1000' >> /start.sh && \
     echo 'echo "Starting seatd..."' >> /start.sh && \
-    echo 'seatd &' >> /start.sh && \
+    echo 'sudo seatd -u user &' >> /start.sh && \
     echo 'sleep 1' >> /start.sh && \
     echo 'echo "Starting Hyprland with D-Bus session..."' >> /start.sh && \
     echo 'sudo -u user bash -c "XDG_RUNTIME_DIR=/run/user/1000 dbus-launch --exit-with-session hyprland > /tmp/hyprland.log 2>&1 &"' >> /start.sh && \
