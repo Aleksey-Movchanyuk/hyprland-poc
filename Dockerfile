@@ -7,7 +7,7 @@ ENV WAYLAND_DISPLAY=wayland-0
 ENV WLR_BACKENDS=headless
 ENV WLR_LIBINPUT_NO_DEVICES=1
 
-# Install all possible dependencies for hyprland and wayvnc (removed libgbm)
+# Install all possible dependencies for hyprland and wayvnc, including seatd
 RUN pacman -Syu --noconfirm && \
     pacman -S --noconfirm \
     dbus \
@@ -70,7 +70,7 @@ RUN echo "[server]" > /home/$USER/.config/wayvnc/config.ini && \
     echo "port = 5900" >> /home/$USER/.config/wayvnc/config.ini && \
     echo "enable_auth = false" >> /home/$USER/.config/wayvnc/config.ini
 
-# Startup script (focused on hyprland with maximum debugging)
+# Startup script (start seatd before hyprland)
 RUN echo '#!/bin/bash' > /start.sh && \
     echo 'set -e' >> /start.sh && \
     echo 'export XDG_RUNTIME_DIR=/run/user/1000' >> /start.sh && \
@@ -81,6 +81,9 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo 'mkdir -p /run/user/1000' >> /start.sh && \
     echo 'chmod 700 /run/user/1000' >> /start.sh && \
     echo 'chown -R user:user /run/user/1000' >> /start.sh && \
+    echo 'echo "Starting seatd..."' >> /start.sh && \
+    echo 'seatd &' >> /start.sh && \
+    echo 'sleep 1' >> /start.sh && \
     echo 'echo "Starting Hyprland with D-Bus session..."' >> /start.sh && \
     echo 'sudo -u user bash -c "XDG_RUNTIME_DIR=/run/user/1000 dbus-launch --exit-with-session hyprland > /tmp/hyprland.log 2>&1 &"' >> /start.sh && \
     echo 'echo "Waiting for Wayland socket..."' >> /start.sh && \
