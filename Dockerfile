@@ -7,7 +7,7 @@ ENV WAYLAND_DISPLAY=wayland-0
 ENV WLR_BACKENDS=headless
 ENV WLR_LIBINPUT_NO_DEVICES=1
 
-# Install all possible dependencies for hyprland and wayvnc, including seatd
+# Install all possible dependencies for hyprland and wayvnc, including mesa-dri
 RUN pacman -Syu --noconfirm && \
     pacman -S --noconfirm \
     dbus \
@@ -29,6 +29,7 @@ RUN pacman -Syu --noconfirm && \
     libxkbcommon \
     pixman \
     mesa \
+    mesa-dri \
     seatd \
     libegl \
     libgles \
@@ -73,7 +74,7 @@ RUN echo "[server]" > /home/$USER/.config/wayvnc/config.ini && \
     echo "port = 5900" >> /home/$USER/.config/wayvnc/config.ini && \
     echo "enable_auth = false" >> /home/$USER/.config/wayvnc/config.ini
 
-# Startup script (start seatd with sudo)
+# Startup script
 RUN echo '#!/bin/bash' > /start.sh && \
     echo 'set -e' >> /start.sh && \
     echo 'export XDG_RUNTIME_DIR=/run/user/1000' >> /start.sh && \
